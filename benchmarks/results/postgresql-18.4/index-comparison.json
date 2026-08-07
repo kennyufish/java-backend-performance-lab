@@ -1,0 +1,258 @@
+{
+  "generatedAt": "2026-08-07T23:12:35.638206500Z",
+  "environment": {
+    "postgres": "PostgreSQL 18.4 on x86_64-windows, compiled by msvc-19.44.35227, 64-bit",
+    "java": "21.0.12",
+    "os": "Windows 11 10.0 amd64",
+    "availableProcessors": 20
+  },
+  "method": {
+    "datasetRows": 1000000,
+    "loadTimeMs": 3405,
+    "warmupRuns": 2,
+    "measuredRuns": 5,
+    "query": "SELECT id, tenant_id, customer_id, event_type, occurred_at, payload\nFROM customer_events\nWHERE tenant_id = 42\n  AND event_type = 'PURCHASE'\n  AND occurred_at >= TIMESTAMPTZ '2025-01-01 00:00:00+00'\nORDER BY occurred_at DESC\nLIMIT 100"
+  },
+  "beforeIndex": {
+    "executionTimesMs": [50.956, 55.91, 52.426, 53.489, 54.409],
+    "medianExecutionTimeMs": 53.489,
+    "scanNode": "Seq Scan",
+    "indexName": "none",
+    "representativePlan": [
+  {
+    "Plan": {
+      "Node Type": "Limit",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Startup Cost": 23163.92,
+      "Total Cost": 23175.57,
+      "Plan Rows": 100,
+      "Plan Width": 80,
+      "Actual Startup Time": 49.627,
+      "Actual Total Time": 54.386,
+      "Actual Rows": 100.00,
+      "Actual Loops": 1,
+      "Disabled": false,
+      "Shared Hit Blocks": 14485,
+      "Shared Read Blocks": 413,
+      "Shared Dirtied Blocks": 0,
+      "Shared Written Blocks": 94,
+      "Local Hit Blocks": 0,
+      "Local Read Blocks": 0,
+      "Local Dirtied Blocks": 0,
+      "Local Written Blocks": 0,
+      "Temp Read Blocks": 0,
+      "Temp Written Blocks": 0,
+      "Plans": [
+        {
+          "Node Type": "Gather Merge",
+          "Parent Relationship": "Outer",
+          "Parallel Aware": false,
+          "Async Capable": false,
+          "Startup Cost": 23163.92,
+          "Total Cost": 23445.30,
+          "Plan Rows": 2416,
+          "Plan Width": 80,
+          "Actual Startup Time": 49.626,
+          "Actual Total Time": 54.380,
+          "Actual Rows": 100.00,
+          "Actual Loops": 1,
+          "Disabled": false,
+          "Workers Planned": 2,
+          "Workers Launched": 2,
+          "Shared Hit Blocks": 14485,
+          "Shared Read Blocks": 413,
+          "Shared Dirtied Blocks": 0,
+          "Shared Written Blocks": 94,
+          "Local Hit Blocks": 0,
+          "Local Read Blocks": 0,
+          "Local Dirtied Blocks": 0,
+          "Local Written Blocks": 0,
+          "Temp Read Blocks": 0,
+          "Temp Written Blocks": 0,
+          "Plans": [
+            {
+              "Node Type": "Sort",
+              "Parent Relationship": "Outer",
+              "Parallel Aware": false,
+              "Async Capable": false,
+              "Startup Cost": 22163.90,
+              "Total Cost": 22166.41,
+              "Plan Rows": 1007,
+              "Plan Width": 80,
+              "Actual Startup Time": 25.412,
+              "Actual Total Time": 25.414,
+              "Actual Rows": 77.00,
+              "Actual Loops": 3,
+              "Disabled": false,
+              "Sort Key": ["occurred_at DESC"],
+              "Sort Method": "top-N heapsort",
+              "Sort Space Used": 51,
+              "Sort Space Type": "Memory",
+              "Shared Hit Blocks": 14485,
+              "Shared Read Blocks": 413,
+              "Shared Dirtied Blocks": 0,
+              "Shared Written Blocks": 94,
+              "Local Hit Blocks": 0,
+              "Local Read Blocks": 0,
+              "Local Dirtied Blocks": 0,
+              "Local Written Blocks": 0,
+              "Temp Read Blocks": 0,
+              "Temp Written Blocks": 0,
+              "Workers": [
+                {
+                  "Worker Number": 0,
+                  "Sort Method": "top-N heapsort",
+                  "Sort Space Used": 51,
+                  "Sort Space Type": "Memory"
+                },
+                {
+                  "Worker Number": 1,
+                  "Sort Method": "top-N heapsort",
+                  "Sort Space Used": 51,
+                  "Sort Space Type": "Memory"
+                }
+              ],
+              "Plans": [
+                {
+                  "Node Type": "Seq Scan",
+                  "Parent Relationship": "Outer",
+                  "Parallel Aware": true,
+                  "Async Capable": false,
+                  "Relation Name": "customer_events",
+                  "Alias": "customer_events",
+                  "Startup Cost": 0.00,
+                  "Total Cost": 22113.67,
+                  "Plan Rows": 1007,
+                  "Plan Width": 80,
+                  "Actual Startup Time": 0.084,
+                  "Actual Total Time": 25.125,
+                  "Actual Rows": 833.33,
+                  "Actual Loops": 3,
+                  "Disabled": false,
+                  "Filter": "((occurred_at >= '2024-12-31 16:00:00-08'::timestamp with time zone) AND (tenant_id = 42) AND ((event_type)::text = 'PURCHASE'::text))",
+                  "Rows Removed by Filter": 332500,
+                  "Shared Hit Blocks": 14409,
+                  "Shared Read Blocks": 413,
+                  "Shared Dirtied Blocks": 0,
+                  "Shared Written Blocks": 94,
+                  "Local Hit Blocks": 0,
+                  "Local Read Blocks": 0,
+                  "Local Dirtied Blocks": 0,
+                  "Local Written Blocks": 0,
+                  "Temp Read Blocks": 0,
+                  "Temp Written Blocks": 0,
+                  "Workers": [
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "Planning": {
+      "Shared Hit Blocks": 0,
+      "Shared Read Blocks": 0,
+      "Shared Dirtied Blocks": 0,
+      "Shared Written Blocks": 0,
+      "Local Hit Blocks": 0,
+      "Local Read Blocks": 0,
+      "Local Dirtied Blocks": 0,
+      "Local Written Blocks": 0,
+      "Temp Read Blocks": 0,
+      "Temp Written Blocks": 0
+    },
+    "Planning Time": 0.081,
+    "Triggers": [
+    ],
+    "Execution Time": 54.409
+  }
+]
+  },
+  "afterIndex": {
+    "executionTimesMs": [0.045, 0.045, 0.039, 0.04, 0.037],
+    "medianExecutionTimeMs": 0.040,
+    "scanNode": "Index Scan",
+    "indexName": "idx_customer_events_tenant_type_occurred_at",
+    "representativePlan": [
+  {
+    "Plan": {
+      "Node Type": "Limit",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Startup Cost": 0.42,
+      "Total Cost": 374.26,
+      "Plan Rows": 100,
+      "Plan Width": 80,
+      "Actual Startup Time": 0.008,
+      "Actual Total Time": 0.030,
+      "Actual Rows": 100.00,
+      "Actual Loops": 1,
+      "Disabled": false,
+      "Shared Hit Blocks": 104,
+      "Shared Read Blocks": 0,
+      "Shared Dirtied Blocks": 0,
+      "Shared Written Blocks": 0,
+      "Local Hit Blocks": 0,
+      "Local Read Blocks": 0,
+      "Local Dirtied Blocks": 0,
+      "Local Written Blocks": 0,
+      "Temp Read Blocks": 0,
+      "Temp Written Blocks": 0,
+      "Plans": [
+        {
+          "Node Type": "Index Scan",
+          "Parent Relationship": "Outer",
+          "Parallel Aware": false,
+          "Async Capable": false,
+          "Scan Direction": "Forward",
+          "Index Name": "idx_customer_events_tenant_type_occurred_at",
+          "Relation Name": "customer_events",
+          "Alias": "customer_events",
+          "Startup Cost": 0.42,
+          "Total Cost": 9163.05,
+          "Plan Rows": 2451,
+          "Plan Width": 80,
+          "Actual Startup Time": 0.007,
+          "Actual Total Time": 0.027,
+          "Actual Rows": 100.00,
+          "Actual Loops": 1,
+          "Disabled": false,
+          "Index Cond": "((tenant_id = 42) AND ((event_type)::text = 'PURCHASE'::text) AND (occurred_at >= '2024-12-31 16:00:00-08'::timestamp with time zone))",
+          "Rows Removed by Index Recheck": 0,
+          "Index Searches": 1,
+          "Shared Hit Blocks": 104,
+          "Shared Read Blocks": 0,
+          "Shared Dirtied Blocks": 0,
+          "Shared Written Blocks": 0,
+          "Local Hit Blocks": 0,
+          "Local Read Blocks": 0,
+          "Local Dirtied Blocks": 0,
+          "Local Written Blocks": 0,
+          "Temp Read Blocks": 0,
+          "Temp Written Blocks": 0
+        }
+      ]
+    },
+    "Planning": {
+      "Shared Hit Blocks": 0,
+      "Shared Read Blocks": 0,
+      "Shared Dirtied Blocks": 0,
+      "Shared Written Blocks": 0,
+      "Local Hit Blocks": 0,
+      "Local Read Blocks": 0,
+      "Local Dirtied Blocks": 0,
+      "Local Written Blocks": 0,
+      "Temp Read Blocks": 0,
+      "Temp Written Blocks": 0
+    },
+    "Planning Time": 0.037,
+    "Triggers": [
+    ],
+    "Execution Time": 0.037
+  }
+]
+  },
+  "medianSpeedup": 1337.225
+}

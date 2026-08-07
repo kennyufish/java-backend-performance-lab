@@ -9,6 +9,8 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -17,6 +19,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 class JavaBackendPerformanceLabApplicationTests {
@@ -27,6 +31,9 @@ class JavaBackendPerformanceLabApplicationTests {
 	private int port;
 
 	private final HttpClient httpClient = HttpClient.newHttpClient();
+
+	@Autowired
+	private JdbcTemplate jdbcTemplate;
 
 	@Test
 	void healthEndpointReportsUp() throws IOException, InterruptedException {
@@ -69,6 +76,49 @@ class JavaBackendPerformanceLabApplicationTests {
 	@Test
 	void blankClientIdIsRejected() throws IOException, InterruptedException {
 		HttpResponse<String> response = authenticate("/api/v1/auth/baseline", " ");
+
+		assertEquals(400, response.statusCode());
+	}
+
+	@Test
+	void recentEventsEndpointReadsFromPostgresThroughJpa() throws IOException, InterruptedException {
+		int tenantId = 900_001;
+		jdbcTemplate.update("""
+				INSERT INTO customer_events (tenant_id, customer_id, event_type, occurred_at, payload)
+				VALUES (?, ?, ?, ?, ?)
+				""",
+				tenantId,
+				123_456L,
+				"PURCHASE",
+				Timestamp.from(Instant.parse("2025-02-01T00:00:00Z")),
+				"phase-2-integration-test");
+
+		try {
+			HttpRequest request = HttpRequest.newBuilder(uri(
+					"/api/v1/events/recent?tenantId=" + tenantId
+							+ "&eventType=PURCHASE&from=2025-01-01T00:00:00Z&limit=10"))
+					.GET()
+					.build();
+
+			HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+			assertEquals(200, response.statusCode());
+			assertTrue(response.body().contains("\"payload\":\"phase-2-integration-test\""));
+			assertTrue(response.body().contains("\"tenantId\":" + tenantId));
+		} finally {
+			jdbcTemplate.update("DELETE FROM customer_events WHERE tenant_id = ?", tenantId);
+		}
+	}
+
+	@Test
+	void recentEventsEndpointRejectsExcessiveLimit() throws IOException, InterruptedException {
+		HttpRequest request = HttpRequest.newBuilder(uri(
+				"/api/v1/events/recent?tenantId=42&eventType=PURCHASE"
+						+ "&from=2025-01-01T00:00:00Z&limit=1001"))
+				.GET()
+				.build();
+
+		HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
 		assertEquals(400, response.statusCode());
 	}
