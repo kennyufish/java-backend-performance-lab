@@ -15,9 +15,13 @@ class AuthenticationService {
 
 	private final ConcurrentMap<String, AuthSession> sessions = new ConcurrentHashMap<>();
 	private final Duration sessionTtl;
+	private final Duration newSessionDelay;
 
-	AuthenticationService(@Value("${lab.auth.session-ttl}") Duration sessionTtl) {
+	AuthenticationService(
+			@Value("${lab.auth.session-ttl}") Duration sessionTtl,
+			@Value("${lab.auth.new-session-delay}") Duration newSessionDelay) {
 		this.sessionTtl = sessionTtl;
+		this.newSessionDelay = newSessionDelay;
 	}
 
 	AuthResponse authenticateEveryRequest(String clientId) {
@@ -39,7 +43,17 @@ class AuthenticationService {
 	}
 
 	private AuthSession newSession(String clientId) {
+		pauseForSyntheticUpstreamAuthentication();
 		return new AuthSession(clientId, UUID.randomUUID(), Instant.now().plus(sessionTtl));
+	}
+
+	private void pauseForSyntheticUpstreamAuthentication() {
+		try {
+			Thread.sleep(newSessionDelay);
+		} catch (InterruptedException exception) {
+			Thread.currentThread().interrupt();
+			throw new IllegalStateException("Synthetic authentication delay was interrupted", exception);
+		}
 	}
 
 	private AuthResponse toResponse(AuthSession session, boolean reused) {

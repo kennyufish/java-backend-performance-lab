@@ -1,0 +1,66 @@
+{
+  "benchmark": "synthetic-authentication-session-reuse",
+  "generatedAtUtc": "2026-08-07T23:53:03.9456130Z",
+  "tool": {
+    "name": "Gatling",
+    "version": "3.15.1"
+  },
+  "configuration": {
+    "requestsPerSecond": 100,
+    "clientPoolSize": 100,
+    "warmupSeconds": 5,
+    "measurementSeconds": 15,
+    "syntheticNewSessionDelay": "20ms"
+  },
+  "environment": {
+    "java": "openjdk version \"21.0.12\" 2026-07-21 LTS",
+    "os": "Microsoft Windows 11 專業版",
+    "processor": "13th Gen Intel(R) Core(TM) i5-13600K",
+    "logicalProcessors": 20,
+    "memoryGiB": 31.8
+  },
+  "results": [
+    {
+      "case": "baseline",
+      "statistics": {
+        "requestCount": 1500,
+        "successfulRequests": 1500,
+        "failedRequests": 0,
+        "responseTimeMs": {
+          "minimum": 24,
+          "percentile50": 33,
+          "percentile75": 34,
+          "percentile95": 37,
+          "percentile99": 51,
+          "maximum": 65,
+          "mean": 34,
+          "standardDeviation": 3
+        }
+      },
+      "rawLog": "baseline-simulation.log"
+    },
+    {
+      "case": "session-reuse",
+      "statistics": {
+        "requestCount": 1500,
+        "successfulRequests": 1500,
+        "failedRequests": 0,
+        "responseTimeMs": {
+          "minimum": 3,
+          "percentile50": 5,
+          "percentile75": 5,
+          "percentile95": 14,
+          "percentile99": 31,
+          "maximum": 66,
+          "mean": 6,
+          "standardDeviation": 5
+        }
+      },
+      "rawLog": "session-reuse-simulation.log"
+    }
+  ],
+  "comparison": {
+    "percentile95Speedup": 2.643,
+    "meanSpeedup": 5.667
+  }
+}
