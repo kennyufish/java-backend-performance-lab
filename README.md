@@ -11,12 +11,14 @@ A public, reproducible lab for measuring Java backend performance trade-offs. Th
 - Gatling Java DSL scenarios with separate warm-up and measurement intervals
 - versioned raw load-test logs and machine-readable summaries
 - PostgreSQL 18, Spring Data JPA, Hibernate schema validation, and Flyway migrations
+- multi-stage, non-root Docker image and PostgreSQL Docker Compose stack
+- GitHub Actions CI for integration tests and container health verification
 - deterministic large-dataset generation with PostgreSQL `generate_series`
 - automated before/after `EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON)` measurements
 - HTTP integration tests against a real PostgreSQL database
 - Maven Wrapper for repeatable builds
 
-Docker Compose, GitHub Actions, and production-capacity claims are not implemented yet.
+Production-capacity claims are intentionally not part of this project.
 
 ## Architecture
 
@@ -35,6 +37,9 @@ flowchart LR
     F["Flyway migrations"] --> P
     BR["IndexBenchmarkRunner"] --> P
     BR --> O["JSON plans and Markdown report"]
+    D["Docker Compose"] --> A
+    D --> P
+    CI["GitHub Actions"] --> D
 ```
 
 ## API paths
@@ -74,7 +79,7 @@ CREATE INDEX idx_customer_events_tenant_type_occurred_at
 - `psql` for initial database creation
 - No global Maven installation is required.
 
-Docker is not required for the completed phases.
+For the container path, use Docker Engine or Docker Desktop with Docker Compose. Local Java and PostgreSQL are not required when the full stack runs through Compose.
 
 ## Database setup
 
@@ -115,6 +120,8 @@ The application supports these environment variables:
 | `LAB_DB_PASSWORD` | no default |
 | `LAB_AUTH_SESSION_TTL` | `30s` |
 | `LAB_AUTH_NEW_SESSION_DELAY` | `0s`; the load-test profile defaults to `20ms` |
+| `LAB_HTTP_PORT` | `8080` for the Compose host port |
+| `LAB_DB_PORT` | `5433` for the Compose PostgreSQL host port |
 
 ## Build and run
 
@@ -177,6 +184,25 @@ Query recent events after generating benchmark data:
 Invoke-RestMethod `
   'http://localhost:8080/api/v1/events/recent?tenantId=42&eventType=PURCHASE&from=2025-01-01T00:00:00Z&limit=100'
 ```
+
+## Run with Docker Compose
+
+The Compose stack builds the application from source and starts PostgreSQL 18.4. PostgreSQL must pass `pg_isready` before the application starts, and the application must pass its Actuator health check before Compose reports success.
+
+```powershell
+docker compose up --build --detach --wait
+Invoke-RestMethod http://localhost:8080/actuator/health
+docker compose down
+```
+
+The default `performance_lab` password is for isolated local development only. Override it for any persistent or shared environment:
+
+```powershell
+$env:LAB_DB_PASSWORD = '<choose-a-local-password>'
+docker compose up --build --detach --wait
+```
+
+The named `postgres-data` volume preserves database contents across `docker compose down`. Use `docker compose down --volumes` only when intentionally discarding that local container data.
 
 ## Reproduce the PostgreSQL benchmark
 
@@ -242,6 +268,8 @@ BUILD SUCCESS
 
 The integration suite starts the application on a real HTTP port, validates Flyway and Hibernate startup, calls the PostgreSQL-backed JPA endpoint, and retains the Phase 1 health and session-behavior checks.
 
+GitHub Actions repeats `clean verify` against a fresh PostgreSQL 18.4 service container. It then builds the multi-stage application image, starts the full Compose stack, waits for both health checks, calls the health endpoint, and always tears down the containers and volume. The workflow uses read-only repository permissions and runs on pushes to `main` and pull requests.
+
 ## Milestones
 
 | Phase | Status | Deliverable | Verification gate |
@@ -249,8 +277,8 @@ The integration suite starts the application on a real HTTP port, validates Flyw
 | 1 | Complete | Health endpoint and baseline/session-reuse API | HTTP integration tests and packaged JAR |
 | 2 | Complete | PostgreSQL, JPA, deterministic dataset, and indexed query | Real database tests plus saved `EXPLAIN ANALYZE` plans |
 | 3 | Complete | Gatling scenarios for baseline versus reuse | Versioned Java scenario, warm-up policy, assertions, raw logs, JSON summary, and rerun script |
-| 4 | Next | Docker Compose and GitHub Actions | Clean container startup and passing CI from a fresh checkout |
-| 5 | Planned | Consolidated benchmark report | Environment, method, results, and limitations documented together |
+| 4 | Complete | Docker Compose and GitHub Actions | Clean container startup and passing CI from a fresh checkout |
+| 5 | Next | Consolidated benchmark report | Environment, method, results, and limitations documented together |
 
 ## Authenticity and confidentiality
 
@@ -265,3 +293,4 @@ This project is independently designed and implemented as a portfolio lab. It do
 - Database integration tests currently require a running local PostgreSQL instance.
 - Both committed benchmark reports are single-machine results, not production-capacity claims.
 - The authentication result is one sequential paired run with a synthetic 20 ms new-session delay.
+- The Compose defaults are for local development, not production deployment or secret management.
