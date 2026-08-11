@@ -5,8 +5,6 @@ services:
       POSTGRES_DB: performance_lab
       POSTGRES_USER: performance_lab
       POSTGRES_PASSWORD: ${LAB_DB_PASSWORD:-performance_lab}
-    ports:
-      - "${LAB_DB_PORT:-5433}:5432"
     volumes:
       - postgres-data:/var/lib/postgresql
     healthcheck:

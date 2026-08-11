@@ -121,7 +121,6 @@ The application supports these environment variables:
 | `LAB_AUTH_SESSION_TTL` | `30s` |
 | `LAB_AUTH_NEW_SESSION_DELAY` | `0s`; the load-test profile defaults to `20ms` |
 | `LAB_HTTP_PORT` | `8080` for the Compose host port |
-| `LAB_DB_PORT` | `5433` for the Compose PostgreSQL host port |
 
 ## Build and run
 
