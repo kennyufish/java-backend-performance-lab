@@ -4,6 +4,12 @@
 
 A reproducible Java backend portfolio project that measures two concrete optimization techniques: reusing active authentication sessions and matching a PostgreSQL composite index to a real query access pattern.
 
+## Interactive demo
+
+[Open the interactive demo](https://kennyufish.github.io/java-backend-performance-lab/) · [中文演示](https://kennyufish.github.io/java-backend-performance-lab/?lang=zh)
+
+The standalone website in [`site/`](site/) animates session reuse and PostgreSQL indexing in English and Chinese. It runs without the Java backend. See [local preview and GitHub Pages publishing](docs/DEMO.md) to use it as this repository's website.
+
 ## Key results
 
 | Experiment | Baseline | Optimized | Repository result |
